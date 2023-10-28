@@ -110,7 +110,7 @@
 
         };
 
-        loadModule("zig-out/lib/graphic.wasm").then((res) => {
+        loadModule("teapot.wasm").then((res) => {
             const { module, mem, heap_ptr } = res;
             loadDemo(module, mem, "basic")
         })
@@ -134,13 +134,5 @@
 
 <body>
     <canvas id="basic"></canvas>
-    <canvas id="color"></canvas>
-    <div>touch or hover to play</div>
-    <canvas id="ball"></canvas>
-    <canvas id="3d"></canvas>
-    <canvas id="cube"></canvas>
-    <canvas id="triangle"></canvas>
-    <!-- <canvas id="draw"></canvas> -->
-    <canvas id="zbuf"></canvas>
-    <canvas id="zsort"></canvas>
+
 </body>
