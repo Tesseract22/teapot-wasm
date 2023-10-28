@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+
+<head>
+    <script>
+        async function loadModule(url = "index.wasm") {
+            const mem = new WebAssembly.Memory({
+                initial: 400,
+                maximum: 400,
+            })
+
+            const heap_ptr = { value: 0 };
+            const env = {
+                sinp: Math.sin,
+                cosp: Math.cos,
+                tanp: Math.tan,
+                cotp: (x) => 1 / Math.tan(x),
+                pi: Math.PI,
+                sqrtp: Math.sqrt,
+                asinp: Math.asin,
+                acosp: Math.acos,
+                heap_ptr: heap_ptr,
+                alloc: (x) => { const tmp = heap_ptr.value; heap_ptr.value += x; return tmp; },
+                putInt: x => console.log(x),
+                putFloat: x => console.log(x),
+            };
+            const imported = {}
+            imported["env"] = new Proxy(env, {
+                get: function (obj, prop) {
+                    if (prop in env) {
+                        // console.log(prop, "prop in environment");
+                        return env[prop];
+                    } else {
+                        // console.log("UNIMPLEMENTED:", prop);
+                        return () => 0;
+                    }
+                }
+            })
+            imported["env"]["memory"] = mem;
+            // imported["js"] = { mem: mem };
+            let module = await WebAssembly.instantiateStreaming(
+                fetch(url), imported
+            );
+
+            return { module, mem, heap_ptr };
+        }
+        function sleep(time) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, time);
+            });
+        }
+        async function loadDemo(module, mem, id) {
+
+            console.log(module)
+            const exports = module.instance.exports;
+            const memory = mem.buffer;
+            console.log(exports);
+            const H = exports.HEIGHT();
+            const W = exports.WIDTH();
+            console.log(H, W);
+            console.log(exports.render(0));
+            const cv = new ImageData(new Uint8ClampedArray(memory, exports.CANVAS(), H * W * 4), W);
+
+
+            console.log(cv)
+            const canvas = document.getElementById(id);
+            const ctx = canvas.getContext("2d");
+            canvas.width = W;
+            canvas.height = H;
+            ctx.putImageData(cv, 0, 0);
+
+
+            let play = false;
+            let prev;
+            let dt = 0
+            const render = (t) => {
+                if (prev === undefined) prev = t;
+                dt += (t - prev);
+                prev = t;
+                if (play) {
+                    const before = Date.now();
+                    exports.render(dt * 1);
+                    // console.log(Date.now() - before);
+                    ctx.putImageData(cv, 0, 0);
+                    window.requestAnimationFrame(render);
+                } else {
+                    prev = undefined;
+                }
+
+
+            }
+            canvas.onmouseenter = async (ev) => {
+                play = true
+                console.log("enter");
+                window.requestAnimationFrame(render);
+
+            }
+            canvas.ontouchstart = async (ev) => {
+                ev.preventDefault();
+
+                play = true
+                console.log("enter");
+                window.requestAnimationFrame(render);
+
+            }
+            canvas.onmouseleave = () => { play = false; }
+            canvas.ontouchend = () => { play = false; }
+
+
+        };
+
+        loadModule("zig-out/lib/graphic.wasm").then((res) => {
+            const { module, mem, heap_ptr } = res;
+            loadDemo(module, mem, "basic")
+        })
+    </script>
+
+</head>
+<style>
+    canvas {
+        display: block;
+
+        margin: 0 auto;
+        margin-top: 5px;
+    }
+
+    .text {
+        display: block;
+
+        text-align: center;
+    }
+</style>
+
+<body>
+    <canvas id="basic"></canvas>
+    <canvas id="color"></canvas>
+    <div>touch or hover to play</div>
+    <canvas id="ball"></canvas>
+    <canvas id="3d"></canvas>
+    <canvas id="cube"></canvas>
+    <canvas id="triangle"></canvas>
+    <!-- <canvas id="draw"></canvas> -->
+    <canvas id="zbuf"></canvas>
+    <canvas id="zsort"></canvas>
+</body>
