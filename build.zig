@@ -20,6 +20,7 @@ pub fn build(b: *std.Build) void {
     wasm.import_memory = true;
     b.installArtifact(wasm);
 
+    b.getInstallStep().dependOn(&b.addInstallFile(wasm.getEmittedBin(), "../docs/teapot.wasm").step);
     
     const exe = b.addExecutable(.{
         .name = "graphic",
