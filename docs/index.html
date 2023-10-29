@@ -76,12 +76,17 @@
             let dt = 0
             const render = (t) => {
                 if (prev === undefined) prev = t;
-                dt += (t - prev);
+                let time_passed = (t - prev)
+                dt += time_passed;
                 prev = t;
                 if (play) {
-                    const before = Date.now();
+                    if (keysBeingPressed['ArrowUp']) {
+                        exports.KEY_ARROW_UP(time_passed)
+                    }
+                    if (keysBeingPressed['ArrowDown']) {
+                        exports.KEY_ARROW_DOWN(time_passed)
+                    }
                     exports.render(dt * 1);
-                    // console.log(Date.now() - before);
                     ctx.putImageData(cv, 0, 0);
                     window.requestAnimationFrame(render);
                 } else {
@@ -114,6 +119,9 @@
             const { module, mem, heap_ptr } = res;
             loadDemo(module, mem, "basic")
         })
+        window.keysBeingPressed = {}
+        window.addEventListener('keydown', event => keysBeingPressed[event.key] = true)
+        window.addEventListener('keyup', event => keysBeingPressed[event.key] = false)
     </script>
 
 </head>
