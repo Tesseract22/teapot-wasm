@@ -1,3 +1,6 @@
+pub const Cursor = @import("cursor.zig");
+pub const Clear = @import("clear.zig");
+
 pub fn getTypeLegnth(comptime a: type) comptime_int {
     return switch (@typeInfo(a)) {
             .Struct => |struct_info| struct_info.fields.len,

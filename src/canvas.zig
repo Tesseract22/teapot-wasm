@@ -1,6 +1,6 @@
 const std = @import("std");
 const simd = std.simd;
-const util = @import("util.zig");
+pub const util = @import("util.zig");
 const DepthBufType = f32;
 const Canvas = @This();
 
@@ -38,15 +38,15 @@ pub fn DDAIterator(comptime N: comptime_int) type {
 width: u32,
 height: u32,
 data: []util.Color4,
-depth: []DepthBufType,
-pub fn init(width: u32, height: u32, data: []util.Color4, depth: []DepthBufType) !Canvas {
+depth: ?[]DepthBufType,
+pub fn init(width: u32, height: u32, data: []util.Color4, depth: ?[]DepthBufType) !Canvas {
     std.debug.assert(data.len == width * height);
-    std.debug.assert(depth.len == width * height);
+    if (depth) |d| std.debug.assert(d.len == width * height);
     return .{ .height = height, .width = width, .data = data, .depth = depth };
 }
 
 pub fn resetDepth(self: *Canvas) void {
-    @memset(self.depth, std.math.floatMin(f32));
+    if (self.depth) |d| @memset(d, std.math.floatMin(f32));
 }
 
 pub fn resize(self: *Canvas, width: u32, height: u32, data: []u8) !void {
@@ -61,10 +61,13 @@ pub fn set(self: *Canvas, pos: [3]f32, el: u32) void {
     if (pos[0] < 0 or pos[0] >= @as(f32, @floatFromInt(self.width)) or pos[1] < 0 or pos[1] >= @as(f32, @floatFromInt(self.height))) return;
     const x: u32 = @intFromFloat(pos[0]);
     const y: u32 = @intFromFloat(pos[1]);
-    if (self.depth[y * self.width + x] >= pos[2]) {
-        return;
+    if (self.depth) |d| {
+        if (d[y * self.width + x] >= pos[2]) {
+            return;
+        }
+        d[y * self.width + x] = pos[2];
     }
-    self.depth[y * self.width + x] = pos[2];
+
     self.data[y * self.width + x] = util.Color4.fromU32(el).*;
 }
 pub fn viewPortTransform2(self: *Canvas, pos: anytype) void {
@@ -163,3 +166,4 @@ pub fn DDA(comptime N: comptime_int, a: @Vector(N, f32), b: @Vector(N, f32), axi
     const p = a + @as(VecN, @splat(e)) * s;
     return .{ .p = p, .s = s, .axis = axis, .bd = b[axis] };
 }
+

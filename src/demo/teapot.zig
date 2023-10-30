@@ -8,14 +8,10 @@ const tokenizeScalar = std.mem.tokenizeScalar;
 const ArrayList = std.ArrayList;
 const PositionList = ArrayList([4]f32);
 const ColorList = ArrayList([3]f32);
-const Teapot = @import("teapot.zig");
+const Teapot = @import("model/teapot.zig");
 
-const Draw = union(enum) {
-    drawArraysTriangles: [2]u32,
-};
-const DrawList = ArrayList(Draw);
 
-const util = @import("util.zig");
+const util = Canvas.util;
 
 
 const Vec = @Vector(10, f32);
@@ -28,7 +24,7 @@ const Vec = @Vector(10, f32);
 
 
 
-const Canvas = @import("canvas.zig");
+const Canvas = @import("Canvas");
 
 
 
@@ -165,7 +161,8 @@ export fn RENDER(time: usize) usize {
         if (normal[2] < -0.5) continue;
         cv.drawTriangleAny(vecs[0], vecs[1], vecs[2], teapotShader);
     
-    }    
+    }
+    
     var ct: u32 = 0;
 
 
@@ -173,8 +170,8 @@ export fn RENDER(time: usize) usize {
     return ct;
 }
 
-const Cursor = @import("cursor.zig");
-const Clear = @import("clear.zig");
+const Cursor = Canvas.util.Cursor;
+const Clear = Canvas.util.Clear;
 pub fn main() !void {
 
     const gradient = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
