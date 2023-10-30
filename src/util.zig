@@ -85,5 +85,39 @@ pub fn rgbaVecToU32(arr: @Vector(4, f32)) u32 {
     return @reduce(.Add, v);
 }
 
+pub fn rgbToGreyScale(r: f32, g: f32, b: f32) f32 {
+    return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+pub fn color4ToGreyScale(c: Color4) f32 {
+    const f = c.toF32();
+    return rgbToGreyScale(f[0], f[1], f[2]);
+}
+
+pub const Color4 = packed struct {
+    r: u8,
+    g: u8,
+    b: u8,
+    a: u8,
+
+    pub fn toU32(self: Color4) *u32 {
+        return @constCast(@ptrCast(&self));
+    }
+    pub fn fromU32(n: u32) *Color4 {
+        return @constCast(@ptrCast(&n));
+    }
+
+    // pub fn toVec4(self: Color4) *@Vector(N, 4) {
+
+    // }
+
+    pub fn toF32(self: Color4) [4]f32 {
+        return .{ 
+            @as(f32,@floatFromInt(self.r))/255,
+            @as(f32,@floatFromInt(self.g))/255,
+            @as(f32,@floatFromInt(self.b))/255,
+            @as(f32,@floatFromInt(self.a))/255,};
+    }
+};
+
 
 

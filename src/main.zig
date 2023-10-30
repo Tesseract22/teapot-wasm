@@ -120,7 +120,7 @@ const cv_height = 512;
 const teapot_w = 5;
 const far: f32 = 0.5;
 const near: f32 = -0.5;
-var buf: [cv_width * cv_height]u32 = undefined;
+var buf: [cv_width * cv_height]util.Color4 = undefined;
 var depth_buf: [cv_width * cv_height]f32 = undefined;
 var ns = [_][3]f32 {.{0} ** 3 } ** Teapot.vs.len; 
 var cv = Canvas.init(cv_width, cv_height, &buf, &depth_buf) catch unreachable;
@@ -140,7 +140,7 @@ export fn RENDER(time: usize) usize {
         calculated = true;
         calNormals();
     }
-    cv.fill(0xff301010);
+    cv.fillU32(0xff301010);
 
     cv.resetDepth();
     const t: f32 = @as(f32, @floatFromInt(time)) / 1000;
@@ -163,7 +163,6 @@ export fn RENDER(time: usize) usize {
         }
         const normal = normalize(faceNormal(extract(vecs[0], 0, 3), extract(vecs[1], 0, 3), extract(vecs[2], 0, 3)));
         if (normal[2] < -0.5) continue;
-        // cv.drawTriangleN(10, vecs[0], vecs[1], vecs[2], teapotShader2);
         cv.drawTriangleAny(vecs[0], vecs[1], vecs[2], teapotShader);
     
     }    
@@ -174,7 +173,52 @@ export fn RENDER(time: usize) usize {
     return ct;
 }
 
+const Cursor = @import("cursor.zig");
+const Clear = @import("clear.zig");
 pub fn main() !void {
 
-    std.debug.print("{}\n", .{RENDER(0)});
+    const gradient = " .'`^\",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+    const h_scale = 15;
+    const w_scale = 15;
+    var stdout_file = std.io.getStdOut();
+    var stdout_writer = stdout_file.writer();
+    var stdout = std.io.bufferedWriter(stdout_writer);
+    const hs = cv_height / h_scale;
+    const ws = cv_width  / w_scale;
+    var buffer = [_] util.Color4 { util.Color4.fromU32(0).* } ** (cv_height * cv_width);
+    _ = try stdout_writer.write("\n");
+    try Clear.clearScreen(stdout_writer);
+    //_ = try stdout.write("\n");
+    const stdin = std.io.getStdIn().reader();
+    _ = stdin;
+    const start = std.time.milliTimestamp();
+    while (true) {
+        const t = std.time.milliTimestamp() - start;
+        // std.debug.print("t: {}\n", .{t});
+        _ = RENDER(@intCast(t));
+        try Cursor.saveCursor(stdout.writer());
+        for (0..hs) |y| {
+            const ys = y * h_scale;
+            for (0..ws) |x| {
+                const xs = x * w_scale;
+                const new_pixel = cv.data[ys * cv_width + xs];
+                const old_pixel = &buffer[ys * cv_width + xs];
+                if (new_pixel.toU32().* == old_pixel.toU32().*) {
+                    try Cursor.cursorForward(stdout.writer(), 1);
+                } else {
+                    const grey: u8 = @intFromFloat(util.color4ToGreyScale(new_pixel) * gradient.len) ;
+                    old_pixel.* = new_pixel;
+                    const c = gradient[gradient.len -  grey];
+                    try stdout.writer().writeByte(c);
+                }
+
+            }
+            // try stdout.writer().writeByte('\n');
+            try Cursor.cursorNextLine(stdout.writer(), 0);
+        }
+        try Cursor.restoreCursor(stdout.writer());
+        try stdout.flush();
+        // std.time.sleep(1000000);
+
+    }
 }

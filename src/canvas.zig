@@ -37,9 +37,9 @@ pub fn DDAIterator(comptime N: comptime_int) type {
 
 width: u32,
 height: u32,
-data: []u32,
+data: []util.Color4,
 depth: []DepthBufType,
-pub fn init(width: u32, height: u32, data: []u32, depth: []DepthBufType) !Canvas {
+pub fn init(width: u32, height: u32, data: []util.Color4, depth: []DepthBufType) !Canvas {
     std.debug.assert(data.len == width * height);
     std.debug.assert(depth.len == width * height);
     return .{ .height = height, .width = width, .data = data, .depth = depth };
@@ -65,7 +65,7 @@ pub fn set(self: *Canvas, pos: [3]f32, el: u32) void {
         return;
     }
     self.depth[y * self.width + x] = pos[2];
-    self.data[y * self.width + x] = el;
+    self.data[y * self.width + x] = util.Color4.fromU32(el).*;
 }
 pub fn viewPortTransform2(self: *Canvas, pos: anytype) void {
     const w: f32 = @floatFromInt(self.width);
@@ -140,8 +140,9 @@ pub fn drawTriangleAny(self: *Canvas, a: anytype, b: anytype, c: anytype, shader
     
     
 }
-pub fn fill(self: *Canvas, el: u32) void {
-    @memset(self.data, el);
+pub fn fillU32(self: *Canvas, el: u32) void {
+    
+    @memset(self.data, util.Color4.fromU32(el).*);
 }
 // pub fn DDA(a: [2]f32, b: [2]f32, axis: u8) ?DDAIterator {
 //     if (a[axis] == b[axis]) return null;

@@ -74,7 +74,7 @@
             let play = false;
             let prev;
             let dt = 0
-            const RENDER = (t) => {
+            const render = (t) => {
                 if (prev === undefined) prev = t;
                 let time_passed = (t - prev)
                 dt += time_passed;
@@ -86,7 +86,7 @@
                     if (keysBeingPressed['ArrowDown']) {
                         exports.KEY_ARROW_DOWN(time_passed)
                     }
-                    exports.render(dt * 1);
+                    exports.RENDER(dt * 1);
                     ctx.putImageData(cv, 0, 0);
                     window.requestAnimationFrame(render);
                 } else {
