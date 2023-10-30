@@ -64,3 +64,26 @@ pub fn normalize(v: anytype) @TypeOf(v) {
     }
     return res;
 }
+
+
+pub fn rgbaU32(r: f32, g: f32, b: f32, a: f32) u32 {
+    return rgbaArrayToU32(.{ r, g, b, a });
+}
+pub fn rgbaArrayToU32(arr: [4]f32) u32 {
+    var res: u32 = 0;
+    for (arr, 0..) |color, i| {
+        const c = @as(u32, @intFromFloat(color * 255));
+        res += @as(u32, @intCast(c)) << (@as(u5, @intCast(i * 8)));
+    }
+    return res;
+}
+
+pub fn rgbaVecToU32(arr: @Vector(4, f32)) u32 {
+    var v: @Vector(4, u32) = @intFromFloat(@as(@Vector(4, f32),@splat(255)) * arr);
+    v = @min(@as(@Vector(4, u32), @splat(255)),  v);
+    v *= @Vector(4, u32) {1, 1 << 8, 1 << 16, 1 << 24};
+    return @reduce(.Add, v);
+}
+
+
+

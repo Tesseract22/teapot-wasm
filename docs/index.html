@@ -59,7 +59,7 @@
             const H = exports.HEIGHT();
             const W = exports.WIDTH();
             console.log(H, W);
-            console.log(exports.render(0));
+            console.log(exports.RENDER(0));
             const cv = new ImageData(new Uint8ClampedArray(memory, exports.CANVAS(), H * W * 4), W);
 
 
@@ -74,7 +74,7 @@
             let play = false;
             let prev;
             let dt = 0
-            const render = (t) => {
+            const RENDER = (t) => {
                 if (prev === undefined) prev = t;
                 let time_passed = (t - prev)
                 dt += time_passed;

@@ -22,32 +22,9 @@ const Vec = @Vector(10, f32);
 
 
 
-fn rgbaU32(r: f32, g: f32, b: f32, a: f32) u32 {
-    return rgbaArrayToU32(.{ r, g, b, a });
-}
-fn rgbaArrayToU32(arr: [4]f32) u32 {
-    var res: u32 = 0;
-    for (arr, 0..) |color, i| {
-        const c = @as(u32, @intFromFloat(color * 255));
-        res += @as(u32, @intCast(c)) << (@as(u5, @intCast(i * 8)));
-    }
-    return res;
-}
-
-fn rgbaVecToU32(arr: @Vector(4, f32)) u32 {
-    var v: @Vector(4, u32) = @intFromFloat(@as(@Vector(4, f32),@splat(255)) * arr);
-    v = @min(@as(@Vector(4, u32), @splat(255)),  v);
-    v *= @Vector(4, u32) {1, 1 << 8, 1 << 16, 1 << 24};
-    return @reduce(.Add, v);
-}
 
 
 
-test "rgb" {
-    log("\n", .{});
-    log("0x{X}\n", .{rgbaArrayToU32(.{1,0,0,1})});
-    log("0x{X}\n", .{rgbaVecToU32(.{1,0,0,1})});
-}
 
 
 
@@ -98,7 +75,7 @@ fn teapotShader(self: *Canvas, v: @Vector(11, f32)) u32 {
     var final_color = light_color * @as(Vec3 ,@splat(lambert)) * color; // diffuse
     final_color += @splat(blinn * 0.5); // shiny
     final_color += color * ambient_light;
-    return rgbaVecToU32(std.simd.join(final_color,  extract(v, 7, 1))) ;
+    return util.rgbaVecToU32(std.simd.join(final_color,  extract(v, 7, 1))) ;
 }
 
 
@@ -158,7 +135,7 @@ export fn KEY_ARROW_DOWN(time_passed: usize) void {
 export fn HEIGHT() u32 { return cv_height; }
 export fn WIDTH() u32 { return cv_width; }
 export fn CANVAS() *anyopaque { return cv.data.ptr; }
-export fn render(time: usize) usize {
+export fn RENDER(time: usize) usize {
     if (!calculated) {
         calculated = true;
         calNormals();
@@ -199,5 +176,5 @@ export fn render(time: usize) usize {
 
 pub fn main() !void {
 
-    std.debug.print("{}\n", .{render(0)});
+    std.debug.print("{}\n", .{RENDER(0)});
 }
