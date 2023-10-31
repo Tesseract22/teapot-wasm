@@ -14,7 +14,6 @@ const Teapot = @import("model/teapot.zig");
 const util = Canvas.util;
 
 
-const Vec = @Vector(10, f32);
 
 
 

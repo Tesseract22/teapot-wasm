@@ -38,6 +38,7 @@ pub fn build(b: *std.Build) !void {
         b.getInstallStep().dependOn(&b.addInstallFile(wasm.getEmittedBin(), docs_path).step);
 
     }
+
     
     
     

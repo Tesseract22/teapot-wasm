@@ -70,6 +70,10 @@ pub fn set(self: *Canvas, pos: [3]f32, el: u32) void {
 
     self.data[y * self.width + x] = util.Color4.fromU32(el).*;
 }
+
+pub fn setRaw(self: *Canvas, pos: [2]u32, el: u32) void {
+    self.data[pos[1] * self.width + pos[0]] = util.Color4.fromU32(el).*;
+}
 pub fn viewPortTransform2(self: *Canvas, pos: anytype) void {
     const w: f32 = @floatFromInt(self.width);
     const h: f32 = @floatFromInt(self.height);

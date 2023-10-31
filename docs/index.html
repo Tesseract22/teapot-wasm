@@ -81,10 +81,15 @@
                 prev = t;
                 if (play) {
                     if (keysBeingPressed['ArrowUp']) {
+                        console.log("up")
                         exports.KEY_ARROW_UP(time_passed)
                     }
                     if (keysBeingPressed['ArrowDown']) {
                         exports.KEY_ARROW_DOWN(time_passed)
+                    }
+                    if (MouseAction['left'] !== undefined) {
+                        let coord = MouseAction['left']
+                        exports.MOUSE_LEFT(coord.x, coord.y)
                     }
                     exports.RENDER(dt * 1);
                     ctx.putImageData(cv, 0, 0);
@@ -97,7 +102,6 @@
             }
             canvas.onmouseenter = async (ev) => {
                 play = true
-                console.log("enter");
                 window.requestAnimationFrame(render);
 
             }
@@ -105,7 +109,6 @@
                 ev.preventDefault();
 
                 play = true
-                console.log("enter");
                 window.requestAnimationFrame(render);
 
             }
@@ -114,12 +117,12 @@
 
 
         };
-
         loadModule("teapot.wasm").then((res) => {
             const { module, mem, heap_ptr } = res;
-            loadDemo(module, mem, "basic")
+            loadDemo(module, mem, "teapot")
         })
         window.keysBeingPressed = {}
+        window.MouseAction = {}
         window.addEventListener('keydown', event => keysBeingPressed[event.key] = true)
         window.addEventListener('keyup', event => keysBeingPressed[event.key] = false)
     </script>
@@ -141,6 +144,5 @@
 </style>
 
 <body>
-    <canvas id="basic"></canvas>
-
+    <canvas id="teapot"></canvas>
 </body>
