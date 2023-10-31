@@ -10,11 +10,13 @@ pub fn build(b: *std.Build) !void {
 
     const canvas_module = b.createModule(.{.source_file = .{.path = "src/canvas.zig"}});
     try b.modules.put(b.dupe("Canvas"), canvas_module);
+    std.log.err("{s}", .{b.pathFromRoot(".")}) ;
+    var demo_dir = try b.build_root.handle.openIterableDir("src/demo/", .{.access_sub_paths = false});
 
-    var demo_dir = try std.fs.cwd().openIterableDir("src/demo/", .{.access_sub_paths = false});
     defer demo_dir.close();
-    var demo_iter  = demo_dir.iterate();
     var path_buf = [_]u8 {0} ** 1024;
+    var demo_iter  = demo_dir.iterate();
+
 
     while (try demo_iter.next()) |entry| {
         if (entry.kind != .file) continue;
