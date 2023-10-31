@@ -9,6 +9,7 @@ pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{.preferred_optimize_mode = .ReleaseSafe});
 
     const canvas_module = b.createModule(.{.source_file = .{.path = "src/canvas.zig"}});
+    try b.modules.put(b.dupe("Canvas"), canvas_module);
 
     var demo_dir = try std.fs.cwd().openIterableDir("src/demo/", .{.access_sub_paths = false});
     defer demo_dir.close();
