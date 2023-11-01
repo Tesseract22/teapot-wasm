@@ -106,7 +106,8 @@ fn calNormals() void {
 
 
 const light_dir =  normalize(@Vector(3, f32) {0, 0, 1});
-const halfway = normalize(light_dir + Vec3 {0, 0, 1});
+const view = Vec3 {0, 0, 1};
+var halfway = normalize(light_dir + view);
 const light_color = @Vector(3, f32) {1, 1, 1};
 const ambient_light = Vec3 {0.1,0.1,0.1};
 
@@ -123,9 +124,15 @@ var tilt: f32 = 0;
 
 export fn KEY_ARROW_UP(time_passed: usize) void {
     tilt += @as(f32,@floatFromInt(time_passed))  * 0.001;
+    var view_t = view;
+    rotate(&view_t[1], &view_t[2], tilt);
+    halfway = normalize(light_dir + view_t);
 }
 export fn KEY_ARROW_DOWN(time_passed: usize) void {
     tilt -= @as(f32,@floatFromInt(time_passed))  * 0.001;
+    var view_t = view;
+    rotate(&view_t[1], &view_t[2], tilt);
+    halfway = normalize(light_dir + view_t);
 }
 export fn HEIGHT() u32 { return cv_height; }
 export fn WIDTH() u32 { return cv_width; }
